@@ -5,16 +5,38 @@ from google.genai import types
 
 schema_run_python_file = types.FunctionDeclaration(
     name="run_python_file",
-    description="Run the provided python file",
+    description=(
+        "Execute a Python script located within a permitted working directory. "
+        "The file path must resolve inside the working directory. "
+        "Standard output and standard error are captured and returned."
+    ),
     parameters=types.Schema(
         type=types.Type.OBJECT,
+        required=["working_directory", "file_path"],
         properties={
             "working_directory": types.Schema(
                 type=types.Type.STRING,
-                description="Path of the current working directory",
+                description=(
+                    "Absolute or relative base directory that defines the execution boundary. "
+                    "The Python file must resolve inside this directory."
+                ),
             ),
-            "file_path": types.Schema(type= types.Type.STRING, description="The path of the python file that is to be run"),
-            "args": types.Schema(type = types.Type.OBJECT, description="The arguments provided when the python file is being run")
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description=(
+                    "Path to the Python (.py) file to execute, relative to the working directory."
+                ),
+            ),
+            "args": types.Schema(
+                type=types.Type.ARRAY,
+                description=(
+                    "Optional list of command-line arguments passed to the Python script. "
+                    "Each item represents a single argument."
+                ),
+                items=types.Schema(
+                    type=types.Type.STRING
+                ),
+            ),
         },
     ),
 )

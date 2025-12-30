@@ -13,8 +13,8 @@ available_functions = types.Tool(
 
 def call_function(function_call: types.FunctionCall, verbose=False):
     function_map = {
-        "get_files_info": get_files_info,
         "get_file_content": get_file_content,
+        "get_files_info": get_files_info,
         "run_python_file": run_python_file,
         "write_file": write_file,
     }
@@ -39,7 +39,8 @@ def call_function(function_call: types.FunctionCall, verbose=False):
 
     args_copy = dict(function_call.args) if function_call.args else {}
 
-    args_copy['working_directory'] = "./calculator"
+    if 'working_directory' not in args_copy:
+        args_copy['working_directory'] = "."  # Or "./calculator" if you want that as defaul
 
     result = function_map[function_name](**args_copy)
 

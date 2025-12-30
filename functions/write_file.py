@@ -3,22 +3,36 @@ from google.genai import types
 
 schema_write_file = types.FunctionDeclaration(
     name="write_file",
-    description="Write the contents to the provided file path in the working directory. If the folders do not exist they are created.",
+    description=(
+        "Write text content to a file within a permitted working directory. "
+        "Parent directories are created automatically if they do not exist. "
+        "The target path must resolve inside the working directory."
+    ),
     parameters=types.Schema(
         type=types.Type.OBJECT,
+        required=["working_directory", "file_path", "content"],
         properties={
             "working_directory": types.Schema(
                 type=types.Type.STRING,
-                description="The base working directory",
+                description=(
+                    "Absolute or relative base directory that defines the security boundary. "
+                    "The file path must resolve inside this directory."
+                ),
             ),
             "file_path": types.Schema(
                 type=types.Type.STRING,
-                description="The path of the file where the content is being written."
+                description=(
+                    "Path to the file to write, relative to the working directory. "
+                    "If the file does not exist, it will be created."
+                ),
             ),
             "content": types.Schema(
                 type=types.Type.STRING,
-                description="The actual content that is written to the file."
-            )
+                description=(
+                    "Text content to write to the file. "
+                    "Binary data must be encoded as text (e.g., base64)."
+                ),
+            ),
         },
     ),
 )

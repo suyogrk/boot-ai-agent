@@ -4,18 +4,29 @@ from google.genai import types
 
 schema_get_file_content = types.FunctionDeclaration(
     name="get_file_content",
-    description="Returns contents of a file.",
+    description=(
+        "Read and return the contents of a text file within a permitted working directory. "
+        "The file path must resolve inside the working directory. "
+        "If the file is too large, the content may be truncated."
+    ),
     parameters=types.Schema(
         type=types.Type.OBJECT,
+        required=["working_directory", "file_path"],
         properties={
             "working_directory": types.Schema(
                 type=types.Type.STRING,
-                description="The base working directory",
+                description=(
+                    "Absolute or relative base directory that acts as a security boundary. "
+                    "The requested file must resolve inside this directory."
+                ),
             ),
             "file_path": types.Schema(
                 type=types.Type.STRING,
-                description="The path of the file whose contents is being read"
-            )
+                description=(
+                    "Path to the file to read, relative to the working directory. "
+                    "Must refer to a regular text file."
+                ),
+            ),
         },
     ),
 )
