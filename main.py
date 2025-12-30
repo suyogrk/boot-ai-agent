@@ -1,11 +1,13 @@
+from call_function import call_function
 from google.genai import types
 from google import genai
-from google.genai.types import GenerateContentResponse 
+from google.genai.types import GenerateContentResponse,  Content , FunctionResponse
 from dotenv import load_dotenv
 import os
 import argparse
 from prompts import system_prompt
 from call_function import available_functions
+from config import GEMINI_2_5_FLASH, GEMINI_2_5_FLASH_LITE
 
 load_dotenv()
 api_key = os.environ.get("GEMINI_API_KEY")
@@ -26,7 +28,7 @@ def main():
     messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
 
     response: GenerateContentResponse = client.models.generate_content(
-        model='gemini-2.5-flash',
+        model=GEMINI_2_5_FLASH_LITE,
         contents=messages,
          config=types.GenerateContentConfig(system_instruction=system_prompt, tools=[available_functions]),
         )
@@ -44,9 +46,33 @@ def main():
     print(response.text)
     function_calls = response.function_calls
 
+    function_result_list = []
+
     if function_calls is not None:
         for function_call in function_calls:
             print(f"Calling function: {function_call.name}({function_call.args})")
+            function_call_result: Content = call_function(function_call)
+
+            if not function_call_result.parts:
+                raise Exception('parts not found in function call result')
+
+            function_response: FunctionResponse | None = function_call_result.parts[0].function_response
+
+            if function_response is None:
+                raise Exception("function response is none")
+            
+            actual_response = function_response.response
+
+            if actual_response is None:
+                raise Exception("There is no response")
+
+            function_result_list.append(function_call_result.parts[0])
+
+            if args.verbose:
+                print(f"-> {actual_response}")
+
+
+
 
 if __name__ == "__main__":
     main()
